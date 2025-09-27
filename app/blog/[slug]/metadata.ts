@@ -1,4 +1,6 @@
 import { docs, meta } from "@/.source";
+import { getAuthor } from "@/lib/authors";
+import { calculateReadTime, extractWordCount, generatePageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import { loader } from "fumadocs-core/source";
 import { createMDXSource } from "fumadocs-mdx";
@@ -19,8 +21,9 @@ export async function generateMetadata({
 
     if (!slug || slug.length === 0) {
       return {
-        title: "Blog Not Found",
+        title: "Blog Post Not Found - Erazor AI Blog",
         description: "The requested blog post could not be found.",
+        robots: "noindex, nofollow",
       };
     }
 
@@ -28,81 +31,62 @@ export async function generateMetadata({
 
     if (!page) {
       return {
-        title: "Blog Not Found",
+        title: "Blog Post Not Found - Erazor AI Blog",
         description: "The requested blog post could not be found.",
+        robots: "noindex, nofollow",
       };
     }
 
-    const ogUrl = `${siteConfig.url}/blog/${slug}`;
-    const ogImage = `${ogUrl}/opengraph-image`;
+    const url = `${siteConfig.url}/blog/${slug}`;
+    const author = page.data.author ? getAuthor(page.data.author) : null;
 
-    return {
-      title: page.data.title,
-      description: page.data.description,
-      keywords: [
-        page.data.title,
-        ...(page.data.tags || []),
-        "Blog",
-        "Article",
-        "Web Development",
-        "Programming",
-        "Technology",
-        "Software Engineering",
-      ],
-      authors: [
-        {
-          name: page.data.author || "Erazor AI",
-          url: siteConfig.url,
-        },
-      ],
-      creator: page.data.author || "Erazor AI",
-      publisher: "Erazor AI",
-      robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-          index: true,
-          follow: true,
-          "max-video-preview": -1,
-          "max-image-preview": "large",
-          "max-snippet": -1,
-        },
+    // Extract content for word count and read time calculation
+    const content = page.data.body?.toString() || '';
+    const wordCount = extractWordCount(content);
+    const readTime = calculateReadTime(content);
+
+    // Enhanced keywords combining page tags and content analysis
+    const enhancedKeywords = [
+      page.data.title,
+      ...(page.data.tags || []),
+      "Erazor.app",
+      "AI Background Remover",
+      "Photo Editing",
+      "Image Processing",
+      "Background Removal",
+      "AI Tools",
+      "Photo Enhancement",
+      "Image Editor",
+      siteConfig.name,
+      ...(author?.name ? [author.name] : []),
+    ];
+
+    return generatePageMetadata({
+      title: `${page.data.title} | ${siteConfig.name}`,
+      description: page.data.description || "Read this comprehensive guide on our blog.",
+      keywords: enhancedKeywords,
+      url,
+      type: 'article',
+      author: author ? {
+        name: author.name,
+        url: 'https://erazor.app', // Link to main Erazor.app site
+      } : {
+        name: 'Erazor.app Team',
+        url: 'https://erazor.app',
       },
-      openGraph: {
-        title: page.data.title,
-        description: page.data.description,
-        type: "article",
-        url: ogUrl,
-        publishedTime: page.data.date,
-        authors: [page.data.author || "Erazor AI"],
-        tags: page.data.tags,
-        images: [
-          {
-            url: page.data.thumbnail || ogImage,
-            width: 1200,
-            height: 630,
-            alt: page.data.title,
-          },
-        ],
-        siteName: siteConfig.name,
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: page.data.title,
-        description: page.data.description,
-        images: [page.data.thumbnail || ogImage],
-        creator: "@dillionverma",
-        site: "@dillionverma",
-      },
-      alternates: {
-        canonical: ogUrl,
-      },
-    };
+      datePublished: page.data.date,
+      dateModified: page.data.date, // Using datePublished as dateModified since updatedDate doesn't exist
+      image: page.data.thumbnail,
+      readTime,
+      wordCount,
+      category: page.data.tags?.[0] || 'Photo Editing',
+    });
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Blog Not Found",
-      description: "The requested blog post could not be found.",
+      title: "Error Loading Blog Post - Erazor AI Blog",
+      description: "An error occurred while loading the blog post.",
+      robots: "noindex, nofollow",
     };
   }
 }

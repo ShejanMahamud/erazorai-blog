@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: "Erazor AI Blog",
-  url: "https://blog-magicui.vercel.app",
+  url: "https://blog.erazor.app",
   description:
-    "Modern React and web development tutorials, insights, and best practices.",
+    "The ultimate AI background remover blog. Learn about photo editing, background removal techniques, AI image processing tools, and creative tips for stunning visuals.",
 };
 
 export type SiteConfig = typeof siteConfig;

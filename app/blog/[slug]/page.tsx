@@ -1,21 +1,25 @@
 import { docs, meta } from "@/.source";
-import { DocsBody } from "fumadocs-ui/page";
+import { Button } from "@/components/ui/button";
 import { loader } from "fumadocs-core/source";
 import { createMDXSource } from "fumadocs-mdx";
-import { notFound } from "next/navigation";
+import { DocsBody } from "fumadocs-ui/page";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { TableOfContents } from "@/components/table-of-contents";
-import { MobileTableOfContents } from "@/components/mobile-toc";
 import { AuthorCard } from "@/components/author-card";
-import { ReadMoreSection } from "@/components/read-more-section";
-import { PromoContent } from "@/components/promo-content";
-import { getAuthor, isValidAuthor } from "@/lib/authors";
-import { FlickeringGrid } from "@/components/magicui/flickering-grid";
+import { Breadcrumb } from "@/components/breadcrumb";
 import { HashScrollHandler } from "@/components/hash-scroll-handler";
+import { FlickeringGrid } from "@/components/magicui/flickering-grid";
+import { MobileTableOfContents } from "@/components/mobile-toc";
+import { PromoContent } from "@/components/promo-content";
+import { ReadMoreSection } from "@/components/read-more-section";
+import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/structured-data";
+import { TableOfContents } from "@/components/table-of-contents";
+import { getAuthor, isValidAuthor } from "@/lib/authors";
+import { calculateReadTime, extractWordCount, generateBreadcrumbs } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -51,8 +55,36 @@ export default async function BlogPost({ params }: PageProps) {
   const date = new Date(page.data.date);
   const formattedDate = formatDate(date);
 
+  // Prepare data for structured data
+  const author = page.data.author && isValidAuthor(page.data.author)
+    ? getAuthor(page.data.author)
+    : null;
+
+  const content = page.data.body?.toString() || '';
+  const wordCount = extractWordCount(content);
+  const readTime = calculateReadTime(content);
+  const url = `${siteConfig.url}/blog/${slug}`;
+
+  // Generate breadcrumbs
+  const breadcrumbs = generateBreadcrumbs(`/blog/${slug}`, page.data.title);
+
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Structured Data */}
+      <ArticleStructuredData
+        title={page.data.title}
+        description={page.data.description || ""}
+        image={page.data.thumbnail}
+        datePublished={page.data.date}
+        author={author ? { name: author.name, url: 'https://erazor.app' } : { name: 'Erazor.app Team', url: 'https://erazor.app' }}
+        url={url}
+        wordCount={wordCount}
+        readTime={readTime}
+        keywords={page.data.tags}
+        category={page.data.tags?.[0] || 'Photo Editing'}
+      />
+      <BreadcrumbStructuredData items={breadcrumbs} />
+
       <HashScrollHandler />
       <div className="absolute top-0 left-0 z-0 w-full h-[200px] [mask-image:linear-gradient(to_top,transparent_25%,black_95%)]">
         <FlickeringGrid
@@ -67,6 +99,16 @@ export default async function BlogPost({ params }: PageProps) {
 
       <div className="space-y-4 border-b border-border relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col gap-6 p-6">
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb
+            items={breadcrumbs.slice(1).map((crumb, index, array) => ({
+              name: crumb.name,
+              href: crumb.url,
+              current: index === array.length - 1,
+            }))}
+            className="pt-2"
+          />
+
           <div className="flex flex-wrap items-center gap-3 gap-y-5 text-sm text-muted-foreground">
             <Button variant="outline" asChild className="h-6 w-6">
               <Link href="/">

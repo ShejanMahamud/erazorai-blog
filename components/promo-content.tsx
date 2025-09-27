@@ -15,7 +15,7 @@ export function PromoContent({
       <div className={cn("border-t border-border bg-muted/20 p-3", className)}>
         <div className="flex items-center gap-3">
           <img
-            src="/magicui-logo.png"
+            src="/logo.png"
             alt="Erazor AI"
             className="w-8 h-8 rounded object-cover flex-shrink-0"
           />
@@ -24,7 +24,7 @@ export function PromoContent({
               Try Erazor AI Pro
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              Beautiful design system
+              BAckground remover tool
             </p>
           </div>
           <a
@@ -45,7 +45,7 @@ export function PromoContent({
     >
       <div className="flex flex-col gap-4">
         <img
-          src="/magicui-pro.png"
+          src="/thumbnails/the-best-ai-background-remover-tools-in-2025.jpg"
           alt="Erazor AI"
           className="w-full h-40 rounded-md object-cover"
         />
@@ -54,8 +54,11 @@ export function PromoContent({
             Try Erazor AI Pro
           </h3>
           <p className="text-sm text-muted-foreground">
-            Erazor AI Pro is a design system for building beautiful and
-            responsive web applications.
+            Erazor AI Pro is a ai powered background remover tool that can remove
+            background from images in seconds.
+          </p>
+          <p className="text-sm text-primary hover:text-primary/80 font-medium">
+            Learn more
           </p>
         </div>
       </div>
