@@ -1,12 +1,36 @@
 import { siteConfig } from '@/lib/site';
 import Script from 'next/script';
 
-interface StructuredDataProps {
-    type: 'Website' | 'Blog' | 'Article' | 'Organization' | 'Breadcrumb';
-    data: any;
+interface ArticleData {
+    title: string;
+    description: string;
+    image?: string;
+    datePublished: string;
+    dateModified?: string;
+    author?: {
+        name: string;
+        url?: string;
+    };
+    url: string;
+    wordCount?: number;
+    readTime?: string;
+    keywords?: string[];
+    category?: string;
 }
 
-export function StructuredData({ type, data }: StructuredDataProps) {
+interface BreadcrumbItem {
+    name: string;
+    url: string;
+}
+
+interface BreadcrumbData {
+    items: BreadcrumbItem[];
+}
+
+interface StructuredDataProps {
+    type: 'Website' | 'Blog' | 'Article' | 'Organization' | 'Breadcrumb';
+    data: ArticleData | BreadcrumbData | null;
+}export function StructuredData({ type, data }: StructuredDataProps) {
     const generateStructuredData = () => {
         switch (type) {
             case 'Website':
@@ -80,18 +104,20 @@ export function StructuredData({ type, data }: StructuredDataProps) {
                 };
 
             case 'Article':
+                if (!data || !('title' in data)) return null;
+                const articleData = data as ArticleData;
                 return {
                     '@context': 'https://schema.org',
                     '@type': 'Article',
-                    headline: data.title,
-                    description: data.description,
-                    image: data.image ? `${siteConfig.url}${data.image}` : undefined,
-                    datePublished: data.datePublished,
-                    dateModified: data.dateModified || data.datePublished,
+                    headline: articleData.title,
+                    description: articleData.description,
+                    image: articleData.image ? `${siteConfig.url}${articleData.image}` : undefined,
+                    datePublished: articleData.datePublished,
+                    dateModified: articleData.dateModified || articleData.datePublished,
                     author: {
                         '@type': 'Person',
-                        name: data.author?.name || 'Erazor.app Team',
-                        url: data.author?.url || 'https://erazor.app',
+                        name: articleData.author?.name || 'Erazor.app Team',
+                        url: articleData.author?.url || 'https://erazor.app',
                     },
                     publisher: {
                         '@type': 'Organization',
@@ -104,20 +130,22 @@ export function StructuredData({ type, data }: StructuredDataProps) {
                     },
                     mainEntityOfPage: {
                         '@type': 'WebPage',
-                        '@id': data.url,
+                        '@id': articleData.url,
                     },
-                    wordCount: data.wordCount,
-                    timeRequired: data.readTime,
-                    keywords: data.keywords?.join(', '),
-                    articleSection: data.category,
+                    wordCount: articleData.wordCount,
+                    timeRequired: articleData.readTime,
+                    keywords: articleData.keywords?.join(', '),
+                    articleSection: articleData.category,
                     inLanguage: 'en-US',
                 };
 
             case 'Breadcrumb':
+                if (!data || !('items' in data)) return null;
+                const breadcrumbData = data as BreadcrumbData;
                 return {
                     '@context': 'https://schema.org',
                     '@type': 'BreadcrumbList',
-                    itemListElement: data.items?.map((item: any, index: number) => ({
+                    itemListElement: breadcrumbData.items?.map((item: BreadcrumbItem, index: number) => ({
                         '@type': 'ListItem',
                         position: index + 1,
                         name: item.name,

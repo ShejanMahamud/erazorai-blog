@@ -30,11 +30,9 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                     </Link>
                 </li>
 
-                {items.map((item, index) => (
+                {items.map((item) => (
                     <li key={item.href} className="flex items-center space-x-1">
-                        <ChevronRight className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-
-                        {item.current ? (
+                        <ChevronRight className="h-4 w-4 flex-shrink-0" aria-hidden="true" />                        {item.current ? (
                             <span
                                 className="font-medium text-foreground truncate"
                                 aria-current="page"

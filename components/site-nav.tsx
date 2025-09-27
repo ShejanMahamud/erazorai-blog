@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { ThemeToggle } from "@/components/theme-toggle";
 import Image from "next/image";
 import Link from "next/link";
